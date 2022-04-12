@@ -300,7 +300,7 @@ class CIFData(Dataset):
 		self.root_dir = root_dir
 		self.max_num_nbr, self.radius = max_num_nbr, radius
 		assert os.path.exists(root_dir), 'root_dir does not exist!'
-		id_prop_file = os.path.join(self.root_dir, 'id_prop.csv')
+		id_prop_file = os.path.join(self.root_dir, 'extend_id_prop.csv')
 		assert os.path.exists(id_prop_file), 'id_prop.csv does not exist!'
 		with open(id_prop_file) as f:
 			reader = csv.reader(f)
@@ -319,7 +319,7 @@ class CIFData(Dataset):
 	@functools.lru_cache(maxsize=None)  # Cache loaded structures
 	def __getitem__(self, idx):
 		data_row = self.id_prop_data[idx]
-		cif_id = str(int(float(data_row.pop(0))))
+		cif_id = str(data_row.pop(0))
 		# At this point we have a list of strings each with some decimal value of a property or None.
 		# To represent None in float datatype while converting we use float("inf")
 		targets = [float(x) if x else float("inf") for x in data_row]

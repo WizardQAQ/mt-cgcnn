@@ -284,11 +284,11 @@ def train(train_loader, model, criterion, optimizer, epoch,
 		data_time.update(time.time() - end)
 
 		if args.cuda:
-			input_var = (Variable(input[0].cuda(non_block=True)),
-						 Variable(input[1].cuda(non_block=True)),
-						 input[2].cuda(non_block=True),
-						 [crys_idx.cuda(non_block=True) for crys_idx in input[3]])
-			targets = targets.cuda(non_block=True)
+			input_var = (Variable(input[0].cuda(non_blocking=True)),
+						 Variable(input[1].cuda(non_blocking=True)),
+						 input[2].cuda(non_blocking=True),
+						 [crys_idx.cuda(non_blocking=True) for crys_idx in input[3]])
+			targets = targets.cuda(non_blocking=True)
 		else:
 			input_var = (Variable(input[0]),
 						 Variable(input[1]),
@@ -297,8 +297,8 @@ def train(train_loader, model, criterion, optimizer, epoch,
 		# normalize target
 		targets_normed = normalizer.norm(targets)
 		if args.cuda:
-			targets_var = Variable(targets_normed.cuda(non_block=True))
-			properties_loss_weight = properties_loss_weight.cuda(non_block=True)
+			targets_var = Variable(targets_normed.cuda(non_blocking=True))
+			properties_loss_weight = properties_loss_weight.cuda(non_blocking=True)
 		else:
 			targets_var = Variable(targets_normed)
 
@@ -378,11 +378,11 @@ def validate(val_loader, model, criterion, normalizer, n_p, properties_loss_weig
 		batch_size = targets.shape[0]
 		with torch.no_grad():
 			if args.cuda:
-				input_var = (Variable(input[0].cuda(non_block=True)),
-							 Variable(input[1].cuda(non_block=True)),
-							 input[2].cuda(non_block=True),
-							 [crys_idx.cuda(non_block=True) for crys_idx in input[3]])
-				targets = targets.cuda(non_block=True)
+				input_var = (Variable(input[0].cuda(non_blocking=True)),
+							 Variable(input[1].cuda(non_blocking=True)),
+							 input[2].cuda(non_blocking=True),
+							 [crys_idx.cuda(non_blocking=True) for crys_idx in input[3]])
+				targets = targets.cuda(non_blocking=True)
 			else:
 				input_var = (Variable(input[0]),
 							 Variable(input[1]),
@@ -391,8 +391,8 @@ def validate(val_loader, model, criterion, normalizer, n_p, properties_loss_weig
 		targets_normed = normalizer.norm(targets)
 		with torch.no_grad():
 			if args.cuda:
-				targets_var = Variable(targets_normed.cuda(non_block=True))
-				properties_loss_weight = properties_loss_weight.cuda(non_block=True)
+				targets_var = Variable(targets_normed.cuda(non_blocking=True))
+				properties_loss_weight = properties_loss_weight.cuda(non_blocking=True)
 			else:
 				targets_var = Variable(targets_normed)
 

@@ -284,11 +284,11 @@ def train(train_loader, model, criterion, optimizer, epoch,
 		data_time.update(time.time() - end)
 
 		if args.cuda:
-			input_var = (Variable(input[0].cuda(async=True)),
-						 Variable(input[1].cuda(async=True)),
-						 input[2].cuda(async=True),
-						 [crys_idx.cuda(async=True) for crys_idx in input[3]])
-			targets = targets.cuda(async=True)
+			input_var = (Variable(input[0].cuda(non_block=True)),
+						 Variable(input[1].cuda(non_block=True)),
+						 input[2].cuda(non_block=True),
+						 [crys_idx.cuda(non_block=True) for crys_idx in input[3]])
+			targets = targets.cuda(non_block=True)
 		else:
 			input_var = (Variable(input[0]),
 						 Variable(input[1]),
@@ -297,8 +297,8 @@ def train(train_loader, model, criterion, optimizer, epoch,
 		# normalize target
 		targets_normed = normalizer.norm(targets)
 		if args.cuda:
-			targets_var = Variable(targets_normed.cuda(async=True))
-			properties_loss_weight = properties_loss_weight.cuda(async=True)
+			targets_var = Variable(targets_normed.cuda(non_block=True))
+			properties_loss_weight = properties_loss_weight.cuda(non_block=True)
 		else:
 			targets_var = Variable(targets_normed)
 
@@ -317,9 +317,9 @@ def train(train_loader, model, criterion, optimizer, epoch,
 			mse_loss = [properties_loss_weight[i]*criterion(output[:,i], targets_var[:,i]) for i in range(n_p)]
 			loss = np.sum(mse_loss) / n_p
 		else:
-			mse_loss = [criterion(output[:,i], targets_var[:,i]) for i in range(n_p)]# for individual properties
-			loss = np.sum(mse_loss) / n_p
-		mse_vec = torch.stack(mse_loss).detach()
+			mse_loss = criterion(output, targets_var)# for individual properties
+			loss = mse_loss.sum(dim=0) / n_p
+		mse_vec = mse_loss.detach()
 
 		# measure accuracy and record loss
 		if args.metric == 'mae':
@@ -378,11 +378,11 @@ def validate(val_loader, model, criterion, normalizer, n_p, properties_loss_weig
 		batch_size = targets.shape[0]
 		with torch.no_grad():
 			if args.cuda:
-				input_var = (Variable(input[0].cuda(async=True)),
-							 Variable(input[1].cuda(async=True)),
-							 input[2].cuda(async=True),
-							 [crys_idx.cuda(async=True) for crys_idx in input[3]])
-				targets = targets.cuda(async=True)
+				input_var = (Variable(input[0].cuda(non_block=True)),
+							 Variable(input[1].cuda(non_block=True)),
+							 input[2].cuda(non_block=True),
+							 [crys_idx.cuda(non_block=True) for crys_idx in input[3]])
+				targets = targets.cuda(non_block=True)
 			else:
 				input_var = (Variable(input[0]),
 							 Variable(input[1]),
@@ -391,8 +391,8 @@ def validate(val_loader, model, criterion, normalizer, n_p, properties_loss_weig
 		targets_normed = normalizer.norm(targets)
 		with torch.no_grad():
 			if args.cuda:
-				targets_var = Variable(targets_normed.cuda(async=True))
-				properties_loss_weight = properties_loss_weight.cuda(async=True)
+				targets_var = Variable(targets_normed.cuda(non_block=True))
+				properties_loss_weight = properties_loss_weight.cuda(non_block=True)
 			else:
 				targets_var = Variable(targets_normed)
 
@@ -402,9 +402,9 @@ def validate(val_loader, model, criterion, normalizer, n_p, properties_loss_weig
 			mse_loss = [properties_loss_weight[i] * criterion(output[:,i], targets_var[:,i]) for i in range(n_p)]
 			loss = np.sum(mse_loss) / n_p
 		else:
-			mse_loss = [criterion(output[:,i], targets_var[:,i]) for i in range(n_p)]	# for individual properties
-			loss = np.sum(mse_loss) / n_p
-		mse_vec = torch.stack(mse_loss).detach()
+			mse_loss = criterion(output, targets_var)# for individual properties
+			loss = mse_loss.sum(dim=0) / n_p
+		mse_vec = mse_loss.detach()
 
 		# measure accuracy and record loss
 		if args.metric == 'mae':

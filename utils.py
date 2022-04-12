@@ -3,7 +3,7 @@ from pymatgen import MPRester
 import numpy as np
 
 # key to query data from Materials Project as string
-API_KEY = "<WRITE MATERIALS PROJECT API KEY HERE>"
+API_KEY = "mtTW0w0TbR3uVeLHt"
 # path where files are written
 FILEPATH = "data/sample/"
 
